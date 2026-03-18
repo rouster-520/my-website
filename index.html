@@ -203,54 +203,72 @@
       color: #1f2a44;
     }
 
-    .chart {
-      display: grid;
-      gap: 14px;
-      margin-top: 14px;
+    .radar-box {
+      background: #f8faff;
+      border-radius: 20px;
+      border: 1px solid #edf1f8;
+      padding: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow-x: auto;
     }
 
-    .chart-row {
+    #radarCanvas {
+      display: block;
+      max-width: 100%;
+      height: auto;
+    }
+
+    .chart-legend {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .legend-item {
       background: #f8faff;
+      border: 1px solid #edf1f8;
       border-radius: 16px;
       padding: 12px 14px;
-      border: 1px solid #edf1f8;
     }
 
-    .chart-top {
+    .legend-top {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 8px;
       gap: 8px;
+      margin-bottom: 6px;
     }
 
-    .chart-label {
+    .legend-label {
       font-size: 15px;
       font-weight: 700;
       color: #2b3550;
     }
 
-    .chart-score {
+    .legend-score {
       font-size: 14px;
       font-weight: 800;
       color: #5b6cff;
       white-space: nowrap;
     }
 
-    .chart-track {
+    .legend-bar {
       width: 100%;
-      height: 12px;
+      height: 10px;
       border-radius: 999px;
       background: #e8edf7;
       overflow: hidden;
     }
 
-    .chart-fill {
+    .legend-fill {
       height: 100%;
-      border-radius: 999px;
       width: 0%;
-      transition: width 0.5s ease;
+      border-radius: 999px;
       background: linear-gradient(90deg, #5b6cff, #8d67ff);
+      transition: width 0.5s ease;
     }
 
     .copy-box {
@@ -324,12 +342,15 @@
       .actions {
         flex-direction: column;
       }
+
+      .chart-legend {
+        grid-template-columns: 1fr;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <!-- 首页 -->
     <div class="card" id="startScreen">
       <div class="badge">班级隐藏人格测试</div>
       <div class="title">你在班里是什么隐藏型人格？</div>
@@ -343,7 +364,6 @@
       </div>
     </div>
 
-    <!-- 测试页 -->
     <div class="card hidden" id="quizScreen">
       <div class="progress-wrap">
         <div class="progress-text" id="progressText">第 1 / 8 题</div>
@@ -356,7 +376,6 @@
       <div class="options" id="optionsContainer"></div>
     </div>
 
-    <!-- 结果页 -->
     <div class="card hidden" id="resultScreen">
       <div class="result-header">
         <div class="result-tag">测试结果</div>
@@ -364,8 +383,12 @@
         <p class="result-desc" id="resultDesc"></p>
       </div>
 
-      <div class="section-title">你的班级气质图表</div>
-      <div class="chart" id="chartContainer"></div>
+      <div class="section-title">你的班级气质雷达图</div>
+      <div class="radar-box">
+        <canvas id="radarCanvas" width="520" height="520"></canvas>
+      </div>
+
+      <div class="chart-legend" id="chartLegend"></div>
 
       <div class="section-title">适合分享的结果文案</div>
       <div class="copy-box" id="copyText"></div>
@@ -585,13 +608,18 @@
       document.getElementById("resultTitle").textContent = result.title;
       document.getElementById("resultDesc").textContent = result.desc;
 
-      renderChart();
+      renderRadarChart();
+      renderLegend();
       generateCopyText(result);
+
+      setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }, 50);
     }
 
-    function renderChart() {
-      const chartContainer = document.getElementById("chartContainer");
-      chartContainer.innerHTML = "";
+    function renderLegend() {
+      const legend = document.getElementById("chartLegend");
+      legend.innerHTML = "";
 
       const maxPossible = 16;
 
@@ -599,19 +627,136 @@
         const score = totalScores[key];
         const percent = Math.min((score / maxPossible) * 100, 100);
 
-        const row = document.createElement("div");
-        row.className = "chart-row";
-        row.innerHTML = `
-          <div class="chart-top">
-            <div class="chart-label">${scoreLabels[key]}</div>
-            <div class="chart-score">${score} 分</div>
+        const item = document.createElement("div");
+        item.className = "legend-item";
+        item.innerHTML = `
+          <div class="legend-top">
+            <div class="legend-label">${scoreLabels[key]}</div>
+            <div class="legend-score">${score} 分</div>
           </div>
-          <div class="chart-track">
-            <div class="chart-fill" style="width:${percent}%"></div>
+          <div class="legend-bar">
+            <div class="legend-fill" style="width:${percent}%"></div>
           </div>
         `;
-        chartContainer.appendChild(row);
+        legend.appendChild(item);
       });
+    }
+
+    function renderRadarChart() {
+      const canvas = document.getElementById("radarCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const cx = width / 2;
+      const cy = height / 2;
+      const radius = 160;
+      const levels = 5;
+      const keys = Object.keys(scoreLabels);
+      const maxValue = 16;
+
+      ctx.clearRect(0, 0, width, height);
+
+      // 背景
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, width, height);
+
+      // 网格
+      for (let level = 1; level <= levels; level++) {
+        const r = radius * (level / levels);
+        ctx.beginPath();
+        keys.forEach((key, i) => {
+          const angle = (-Math.PI / 2) + (Math.PI * 2 * i / keys.length);
+          const x = cx + Math.cos(angle) * r;
+          const y = cy + Math.sin(angle) * r;
+          if (i === 0) {
+            ctx.moveTo(x, y);
+          } else {
+            ctx.lineTo(x, y);
+          }
+        });
+        ctx.closePath();
+        ctx.strokeStyle = level === levels ? "#d8def0" : "#e8edf7";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+
+      // 放射线
+      keys.forEach((key, i) => {
+        const angle = (-Math.PI / 2) + (Math.PI * 2 * i / keys.length);
+        const x = cx + Math.cos(angle) * radius;
+        const y = cy + Math.sin(angle) * radius;
+
+        ctx.beginPath();
+        ctx.moveTo(cx, cy);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = "#e3e9f5";
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+
+      // 数据区域
+      ctx.beginPath();
+      keys.forEach((key, i) => {
+        const value = totalScores[key];
+        const r = radius * (value / maxValue);
+        const angle = (-Math.PI / 2) + (Math.PI * 2 * i / keys.length);
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      });
+      ctx.closePath();
+      ctx.fillStyle = "rgba(91, 108, 255, 0.24)";
+      ctx.strokeStyle = "#5b6cff";
+      ctx.lineWidth = 3;
+      ctx.fill();
+      ctx.stroke();
+
+      // 数据点
+      keys.forEach((key, i) => {
+        const value = totalScores[key];
+        const r = radius * (value / maxValue);
+        const angle = (-Math.PI / 2) + (Math.PI * 2 * i / keys.length);
+        const x = cx + Math.cos(angle) * r;
+        const y = cy + Math.sin(angle) * r;
+
+        ctx.beginPath();
+        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.fillStyle = "#5b6cff";
+        ctx.fill();
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      });
+
+      // 标签
+      keys.forEach((key, i) => {
+        const angle = (-Math.PI / 2) + (Math.PI * 2 * i / keys.length);
+        const labelRadius = radius + 36;
+        const x = cx + Math.cos(angle) * labelRadius;
+        const y = cy + Math.sin(angle) * labelRadius;
+
+        ctx.fillStyle = "#2b3550";
+        ctx.font = "bold 16px Microsoft YaHei, PingFang SC, Arial";
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(scoreLabels[key], x, y);
+
+        ctx.fillStyle = "#5b6cff";
+        ctx.font = "bold 14px Microsoft YaHei, PingFang SC, Arial";
+        ctx.fillText(`${totalScores[key]}分`, x, y + 22);
+      });
+
+      // 中心标题
+      ctx.fillStyle = "#1f2a44";
+      ctx.font = "bold 18px Microsoft YaHei, PingFang SC, Arial";
+      ctx.textAlign = "center";
+      ctx.fillText("班级气质雷达图", cx, 34);
     }
 
     function generateCopyText(result) {
@@ -622,10 +767,10 @@
         .join("｜");
 
       const text = `我测出来的班级隐藏人格是：${result.title}
-      
+
 ${result.desc}
 
-我的气质图表：
+我的前三项气质是：
 ${sortedTraits}
 
 来测测你在班里是什么隐藏型人格：
