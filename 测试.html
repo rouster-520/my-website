@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>你在班里是什么隐藏型人格？</title>
+  <style>
+    :root {
+      --bg1: #0f1020;
+      --bg2: #1b1d36;
+      --card: rgba(255,255,255,0.08);
+      --card-border: rgba(255,255,255,0.14);
+      --text: #f5f7ff;
+      --muted: #b9bfdc;
+      --accent: #8b7bff;
+      --accent2: #ff7bc3;
+      --accent3: #53d8fb;
+      --good: #7dffb3;
+      --shadow: 0 20px 40px rgba(0,0,0,0.35);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(139,123,255,0.25), transparent 30%),
+        radial-gradient(circle at top right, rgba(255,123,195,0.18), transparent 30%),
+        linear-gradient(135deg, var(--bg1), var(--bg2));
+      color: var(--text);
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .app {
+      width: 100%;
+      max-width: 430px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--card-border);
+      backdrop-filter: blur(16px);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 20px;
+      animation: fadeUp 0.5s ease;
+    }
+
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: #fff;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.2;
+      margin-bottom: 12px;
+      font-weight: 800;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 15px;
+      margin-bottom: 22px;
+    }
+
+    .hero-box {
+      padding: 16px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 20px;
+    }
+
+    .hero-box p {
+      font-size: 14px;
+      color: #d8defd;
+      line-height: 1.8;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 16px;
+      padding: 15px 18px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+
+    .btn-primary {
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      color: white;
+      box-shadow: 0 12px 30px rgba(139,123,255,0.35);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      opacity: 0.96;
+    }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.12);
+      margin-top: 12px;
+    }
+
+    .progress-wrap {
+      margin-bottom: 20px;
+    }
+
+    .progress-top {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+
+    .progress-inner {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent3), var(--accent));
+      transition: width 0.3s ease;
+    }
+
+    .question {
+      font-size: 24px;
+      line-height: 1.45;
+      font-weight: 800;
+      margin-bottom: 20px;
+    }
+
+    .option-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-btn {
+      text-align: left;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.06);
+      color: white;
+      padding: 16px 14px;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: 0.22s ease;
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .option-btn:hover {
+      background: rgba(139,123,255,0.18);
+      border-color: rgba(139,123,255,0.45);
+      transform: translateY(-1px);
+    }
+
+    .result-top {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .result-icon {
+      font-size: 46px;
+      margin-bottom: 10px;
+    }
+
+    .result-type {
+      font-size: 30px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .result-tagline {
+      color: #e5e9ff;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+
+    .result-card {
+      margin-top: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .info-box {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 18px;
+      padding: 14px;
+    }
+
+    .info-box h3 {
+      font-size: 14px;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+
+    .info-box p {
+      font-size: 14px;
+      line-height: 1.75;
+      color: #dbe0ff;
+    }
+
+    .share-text {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, rgba(139,123,255,0.2), rgba(255,123,195,0.14));
+      border: 1px solid rgba(255,255,255,0.12);
+      color: #fff;
+      font-size: 14px;
+      line-height: 1.8;
+    }
+
+    .footer-tip {
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .small-title {
+      font-size: 13px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    @media (max-width: 420px) {
+      h1 {
+        font-size: 24px;
+      }
+
+      .question {
+        font-size: 21px;
+      }
+
+      .result-type {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- 首页 -->
+    <section id="startScreen" class="card">
+      <div class="badge">学生专属小测试</div>
+      <h1>你在班里是什么隐藏型人格？</h1>
+      <p class="subtitle">
+        8 道题，测出你在同学眼里的真实气质。<br />
+        不是普通 MBTI，这次测的是你的“班级人设”。
+      </p>
+
+      <div class="hero-box">
+        <p>
+          你可能不是最吵的那个，<br />
+          但你很可能是最有记忆点的那个。<br />
+          来看看你到底是：<b>安静观察者</b>、<b>反差幽默派</b>，还是<b>隐藏领导者</b>？
+        </p>
+      </div>
+
+      <button class="btn btn-primary" onclick="startQuiz()">开始测试</button>
+      <div class="footer-tip">建议用手机打开，体验更好</div>
+    </section>
+
+    <!-- 题目页 -->
+    <section id="quizScreen" class="card hidden">
+      <div class="progress-wrap">
+        <div class="progress-top">
+          <span id="progressText">第 1 / 8 题</span>
+          <span id="progressPercent">12%</span>
+        </div>
+        <div class="progress-bar">
+          <div id="progressInner" class="progress-inner"></div>
+        </div>
+      </div>
+
+      <div class="small-title">凭第一感觉选，不要想太久</div>
+      <div id="questionText" class="question"></div>
+      <div id="optionsBox" class="option-list"></div>
+    </section>
+
+    <!-- 结果页 -->
+    <section id="resultScreen" class="card hidden">
+      <div class="result-top">
+        <div id="resultIcon" class="result-icon">✨</div>
+        <div class="small-title">你的测试结果</div>
+        <div id="resultType" class="result-type"></div>
+        <p id="resultTagline" class="result-tagline"></p>
+      </div>
+
+      <div class="result-card">
+        <div class="info-box">
+          <h3>你的班级气质</h3>
+          <p id="resultDesc"></p>
+        </div>
+        <div class="info-box">
+          <h3>别人眼中的你</h3>
+          <p id="resultView"></p>
+        </div>
+        <div class="info-box">
+          <h3>你的隐藏优点</h3>
+          <p id="resultStrength"></p>
+        </div>
+        <div class="info-box">
+          <h3>适合你的搭子类型</h3>
+          <p id="resultMatch"></p>
+        </div>
+      </div>
+
+      <div class="share-text" id="shareText"></div>
+
+      <button class="btn btn-primary" style="margin-top:18px;" onclick="copyResult()">复制结果文案</button>
+      <button class="btn btn-secondary" onclick="restartQuiz()">重新测试</button>
+
+      <div class="footer-tip">把结果发给朋友，看看他是不是也觉得很准</div>
+    </section>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        q: "新学期刚分班时，你通常会：",
+        options: [
+          { text: "先观察大家，再决定和谁接近", type: "observer" },
+          { text: "主动跟人搭话，先混熟再说", type: "leader" },
+          { text: "只和认识的人待在一起", type: "steady" },
+          { text: "表面很淡定，其实心里有点紧张", type: "sensitive" }
+        ]
+      },
+      {
+        q: "班里突然要自由组队时，你更可能：",
+        options: [
+          { text: "被别人自然拉进队里", type: "observer" },
+          { text: "直接组织，顺手把队伍定了", type: "leader" },
+          { text: "优先找熟人，靠谱最重要", type: "steady" },
+          { text: "假装无所谓，但会偷偷在意谁来找我", type: "sensitive" }
+        ]
+      },
+      {
+        q: "你在群里最常见的状态是：",
+        options: [
+          { text: "平时不冒泡，一说话就很有梗", type: "funny" },
+          { text: "会发通知、提醒、安排事情", type: "leader" },
+          { text: "潜水型，安静看大家聊天", type: "observer" },
+          { text: "只在熟人多的时候活跃", type: "steady" }
+        ]
+      },
+      {
+        q: "如果朋友突然情绪很差，你通常会：",
+        options: [
+          { text: "先静静陪着，不会追着问", type: "observer" },
+          { text: "直接想办法安慰和解决", type: "leader" },
+          { text: "会认真记住这件事，之后继续关心", type: "sensitive" },
+          { text: "讲点轻松的，让气氛没那么沉", type: "funny" }
+        ]
+      },
+      {
+        q: "老师点你回答问题时，你最真实的反应是：",
+        options: [
+          { text: "外表平静，脑子已经疯狂运转", type: "observer" },
+          { text: "先答了再说，气势不能输", type: "leader" },
+          { text: "有点慌，但会尽量稳住", type: "steady" },
+          { text: "如果答错了，之后会尴尬一阵子", type: "sensitive" }
+        ]
+      },
+      {
+        q: "在朋友关系里，你更像：",
+        options: [
+          { text: "慢热，但熟了以后很真诚", type: "steady" },
+          { text: "很会带动气氛，大家和你在一起不容易冷场", type: "funny" },
+          { text: "不一定话多，但总能注意到细节", type: "observer" },
+          { text: "表面看不出来，其实很在意每个人的情绪", type: "sensitive" }
+        ]
+      },
+      {
+        q: "别人第一次认识你，最可能误会你的是：",
+        options: [
+          { text: "以为我很高冷，其实只是慢热", type: "steady" },
+          { text: "以为我很好接近，其实我也会有压力", type: "leader" },
+          { text: "以为我没想法，其实我观察得很细", type: "observer" },
+          { text: "以为我一直很搞笑，其实我也会认真想很多", type: "funny" }
+        ]
+      },
+      {
+        q: "如果班里要选一个角色，你更适合：",
+        options: [
+          { text: "军师型，在关键时刻给出判断", type: "observer" },
+          { text: "组织者，把事情推动起来", type: "leader" },
+          { text: "稳定器，让大家感觉靠谱安心", type: "steady" },
+          { text: "气氛组，让整个场子没那么僵", type: "funny" }
+        ]
+      }
+    ];
+
+    const results = {
+      observer: {
+        icon: "🛰️",
+        type: "安静观察者",
+        tagline: "你不一定最显眼，但你总能最先看懂局面。",
+        desc: "你属于那种不抢风头、但很有存在感的人。你会先看、先想、先判断，很少冲动出手。你在班里像一个低调雷达，很多细节别人没发现，你早就注意到了。",
+        view: "别人会觉得你有点安静、甚至有点难接近，但熟了之后会发现你其实很稳，而且看人很准。你不是话最多的，但你说的话通常都很有分量。",
+        strength: "你的优势是冷静、判断力强、细节感好。很多人情绪上头的时候，你还能保持清醒。你很适合当朋友里的“清醒担当”。",
+        match: "你适合和外向一点、表达直接一点的人搭配。对方负责打开场面，你负责看清局势，这种组合会很舒服。",
+        share: "我测出来是「安静观察者」：表面不抢戏，实际看人很准。不是最吵的那个，但往往是最先看懂场面的那个。"
+      },
+      leader: {
+        icon: "🔥",
+        type: "隐藏领导者",
+        tagline: "你天生有一种让事情动起来的能力。",
+        desc: "你不一定总是在最前面表现，但关键时候很容易自然站出来。你对场面节奏、事情推进和大家状态都很敏感，很多时候别人会下意识跟着你走。",
+        view: "别人会觉得你很有主见、很敢说，也很像那种遇事能顶上去的人。你身上有一种“交给你，好像会比较稳”的感觉。",
+        strength: "你的优势是行动力、带动能力和执行力。你不只是会想，更会让事情真的发生。你适合当发起者、组织者、队长型角色。",
+        match: "你适合和细心、稳定、能补细节的人搭档。你负责推动，对方负责打磨，这样效率会很高。",
+        share: "我测出来是「隐藏领导者」：不一定天天出头，但关键时候总会自然站出来。属于那种能把事情推进下去的人。"
+      },
+      steady: {
+        icon: "🌙",
+        type: "慢热靠谱派",
+        tagline: "你不是瞬间很亮的人，但会越相处越让人离不开。",
+        desc: "你给人的感觉通常是安静、稳、不会乱来。你不喜欢轻飘飘的关系，也不会随便对谁都很热情，但一旦认定了某些人，你会很真诚、很长久。",
+        view: "别人会觉得你慢热、有点距离感，但相处久了会发现你是特别稳定、特别能给人安全感的类型。你不喧闹，但很让人放心。",
+        strength: "你的优势是稳定、真诚、抗波动。你不是最会制造热闹的人，但你是那种在关系里特别值得信任的人。",
+        match: "你适合和热情一点、会主动一点的人做朋友。对方能带你进入新场景，你能让关系变得更长久、更扎实。",
+        share: "我测出来是「慢热靠谱派」：第一眼可能不算特别热，但越熟越稳，属于那种让人放心的朋友型人格。"
+      },
+      sensitive: {
+        icon: "💎",
+        type: "外冷内热型",
+        tagline: "你看起来很平静，其实心里装着很多细腻的感受。",
+        desc: "你不是那种把情绪挂在脸上的人，但并不代表你不在意。相反，你常常会默默记住很多事情，也会在细小的地方对别人有很深的感受和反馈。",
+        view: "别人可能会以为你淡淡的、不太在乎，其实你只是习惯把情绪往里收。真正了解你的人会知道，你对朋友其实很认真，也很重感情。",
+        strength: "你的优势是共情力、细腻和感受力。你很懂那些没说出口的情绪，也很容易捕捉别人忽略的心情变化。",
+        match: "你适合和情绪稳定、愿意表达、不会让你一直猜的人相处。这样你会轻松很多，也更容易舒服地做自己。",
+        share: "我测出来是「外冷内热型」：看起来好像很平静，其实心里记得很多事，也会很认真地在意身边的人。"
+      },
+      funny: {
+        icon: "🎭",
+        type: "反差幽默派",
+        tagline: "你是那种越熟越上头的人，气氛到了你就会发光。",
+        desc: "你很会让场面没那么僵，也很容易在不经意间抛出让人记住的梗。你可能不是一直外向，但你一旦进入舒服状态，就会变成气氛的关键人物。",
+        view: "别人会觉得你挺有意思、挺会接话，也很有反差感。表面看可能普通，一熟起来大家就会发现你是隐藏气氛组。",
+        strength: "你的优势是轻松感、幽默感和社交缓冲能力。你很擅长把紧张场面变柔和，让别人和你待在一起时更放松。",
+        match: "你适合和稳定、包容、能接住你梗的人相处。这样你会更自在，也更容易进入你最有魅力的状态。",
+        share: "我测出来是「反差幽默派」：平时不一定最显眼，但熟了以后会变得超有梗，属于隐藏气氛组。"
+      }
+    };
+
+    let currentQuestion = 0;
+    let scores = {
+      observer: 0,
+      leader: 0,
+      steady: 0,
+      sensitive: 0,
+      funny: 0
+    };
+
+    function startQuiz() {
+      document.getElementById("startScreen").classList.add("hidden");
+      document.getElementById("resultScreen").classList.add("hidden");
+      document.getElementById("quizScreen").classList.remove("hidden");
+
+      currentQuestion = 0;
+      scores = {
+        observer: 0,
+        leader: 0,
+        steady: 0,
+        sensitive: 0,
+        funny: 0
+      };
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      const q = questions[currentQuestion];
+      const questionText = document.getElementById("questionText");
+      const optionsBox = document.getElementById("optionsBox");
+      const progressText = document.getElementById("progressText");
+      const progressPercent = document.getElementById("progressPercent");
+      const progressInner = document.getElementById("progressInner");
+
+      questionText.textContent = q.q;
+      optionsBox.innerHTML = "";
+
+      q.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = option.text;
+        btn.onclick = () => selectOption(option.type);
+        optionsBox.appendChild(btn);
+      });
+
+      const percent = Math.round(((currentQuestion + 1) / questions.length) * 100);
+      progressText.textContent = `第 ${currentQuestion + 1} / ${questions.length} 题`;
+      progressPercent.textContent = `${percent}%`;
+      progressInner.style.width = `${percent}%`;
+    }
+
+    function selectOption(type) {
+      scores[type]++;
+
+      if (currentQuestion < questions.length - 1) {
+        currentQuestion++;
+        renderQuestion();
+      } else {
+        showResult();
+      }
+    }
+
+    function showResult() {
+      document.getElementById("quizScreen").classList.add("hidden");
+      document.getElementById("resultScreen").classList.remove("hidden");
+
+      const bestType = getBestType();
+      const result = results[bestType];
+
+      document.getElementById("resultIcon").textContent = result.icon;
+      document.getElementById("resultType").textContent = result.type;
+      document.getElementById("resultTagline").textContent = result.tagline;
+      document.getElementById("resultDesc").textContent = result.desc;
+      document.getElementById("resultView").textContent = result.view;
+      document.getElementById("resultStrength").textContent = result.strength;
+      document.getElementById("resultMatch").textContent = result.match;
+      document.getElementById("shareText").textContent = "分享文案：\n" + result.share;
+    }
+
+    function getBestType() {
+      let maxType = "observer";
+      let maxScore = -1;
+
+      for (const type in scores) {
+        if (scores[type] > maxScore) {
+          maxScore = scores[type];
+          maxType = type;
+        }
+      }
+
+      return maxType;
+    }
+
+    function restartQuiz() {
+      document.getElementById("resultScreen").classList.add("hidden");
+      document.getElementById("startScreen").classList.remove("hidden");
+    }
+
+    function copyResult() {
+      const text = document.getElementById("shareText").innerText;
+      navigator.clipboard.writeText(text).then(() => {
+        alert("结果文案已复制，快发给朋友看看。");
+      }).catch(() => {
+        alert("复制失败，你可以手动复制结果文字。");
+      });
+    }
+  </script>
+</body>
+</html>
